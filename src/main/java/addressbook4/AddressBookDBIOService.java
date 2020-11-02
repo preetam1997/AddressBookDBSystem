@@ -9,8 +9,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.checkerframework.common.reflection.qual.NewInstance;
-
 public class AddressBookDBIOService {
 
 	private List<Contacts> getContactData(ResultSet resultSet) {
@@ -59,11 +57,24 @@ public class AddressBookDBIOService {
 		}
 		return contactList;
 	}
+	
+	public int updateData(String fname, String phoneNumber) {
+		String sql = String.format("update contacts set phoneNumber = '%s' where firstName = '%s'", phoneNumber, fname);
+		try (Connection connection = this.getConnection()) {
+			Statement statement = connection.createStatement();
+			return statement.executeUpdate(sql);
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+
+	}
 
 	public static void main(String[] args) throws SQLException {
 		System.out.println(new AddressBookDBIOService().getConnection());
 		List<Contacts> k = new AddressBookDBIOService().retrieveData();
-		System.out.println(k.get(5).firstName);
+		System.out.println(new AddressBookDBIOService().updateData("Preetam", "654321"));
 	}
 
 }

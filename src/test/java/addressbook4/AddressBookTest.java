@@ -8,7 +8,14 @@ import static org.junit.Assert.*;
 
 public class AddressBookTest {
 	@Test
-	public void testSomeLibraryMethod() {
+	public void givenDatabase_WhenDataRetrieved_ShouldPassTest() {
 		assertEquals("Lionel", new AddressBookDBIOService().retrieveData().get(5).firstName);
 	}
+	
+	@Test
+	public void givenDatabase_WhenDataUpdated_ShouldPassTest() {
+		assertEquals(1, new AddressBookDBIOService().updateData("Preetam", "123456"));
+	}
+	
+	
 }
