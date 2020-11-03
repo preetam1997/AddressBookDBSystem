@@ -9,12 +9,25 @@ import static org.junit.Assert.*;
 public class AddressBookTest {
 	@Test
 	public void givenDatabase_WhenDataRetrieved_ShouldPassTest() {
-		assertEquals("Lionel", new AddressBookDBIOService().retrieveData().get(5).firstName);
+		assertEquals("Lionel", new AddressBookDBIOService().retrieveData("normal").get(5).firstName);
 	}
 	
 	@Test
 	public void givenDatabase_WhenDataUpdated_ShouldPassTest() {
 		assertEquals(1, new AddressBookDBIOService().updateData("Preetam", "123456"));
+	}
+	
+	@Test
+	public void givenDatabase_WhenDataRetrievedWithinADateRange_ShouldPassTest() {
+		assertEquals(7, new AddressBookDBIOService().retrieveData("dateWise").size());
+	}
+	
+	@Test
+	public void givenDatabase_WhenDataRetrievedCountByCityOrState_ShouldPassTest() {
+		
+		AddressBookDBIOService addressBook = new AddressBookDBIOService();
+		addressBook.retrieveData("state");
+		assertEquals(2, (int)addressBook.CountMap.get("Bihar"));
 	}
 	
 	

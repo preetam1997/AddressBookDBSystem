@@ -2,14 +2,21 @@ package addressbook4;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections.map.HashedMap;
 
 public class AddressBookDBIOService {
+
+	private PreparedStatement contactDataStatement;
+	public Map<String, Integer> CountMap = new HashedMap();
 
 	private List<Contacts> getContactData(ResultSet resultSet) {
 		List<Contacts> contactList = new ArrayList<>();
@@ -38,26 +45,105 @@ public class AddressBookDBIOService {
 
 	}
 
+	private void prepareMap(ResultSet resultSet, String type) {
+		try {
+			CountMap.clear();
+			while (resultSet.next()) {
+				if (type.equals("city")) {
+					String city = resultSet.getString("city");
+					int count = resultSet.getInt("count(*)");
+					CountMap.put(city, count);
+				} else {
+					String state = resultSet.getString("state");
+					int count = resultSet.getInt("count(*)");
+					CountMap.put(state, count);
+				}
+
+			}
+		} catch (SQLException e) {
+
+			e.printStackTrace();
+		}
+
+	}
+
+	private void preparedStatementForContactData(String arg1, String arg2) {
+		try {
+			Connection connection = this.getConnection();
+			String sql = String.format("Select %s,count(*) from contacts group by %s", arg1, arg2);
+			contactDataStatement = connection.prepareStatement(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+	}
+
 	public Connection getConnection() throws SQLException {
 		Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/AddressBook", "root", "Preetam@1997");
 		return con;
 	}
 
-	public List<Contacts> retrieveData() {
-		String sql = "select addressBookType,addressBookName,firstName,lastName,address,city,state,zip,phoneNumber,email from addressbooktype,addressbookname,contactaddressbookmap,contacts where addressbooktype.addressBookId = addressbookname.id and contactaddressbookmap.addressBookId = addressbookname.id and contactaddressbookmap.contactId = contacts.id";
+	public String getStatement(String type) {
+		switch (type) {
+		case "normal":
+			return "select addressBookType,addressBookName,firstName,lastName,address,city,state,zip,phoneNumber,email from addressbooktype,addressbookname,contactaddressbookmap,contacts where addressbooktype.addressBookId = addressbookname.id and contactaddressbookmap.addressBookId = addressbookname.id and contactaddressbookmap.contactId = contacts.id";
+		case "dateWise":
+			return "select addressBookType,addressBookName,firstName,lastName,address,city,state,zip,phoneNumber,email from addressbooktype,addressbookname,contactaddressbookmap,contacts where addressbooktype.addressBookId = addressbookname.id and contactaddressbookmap.addressBookId = addressbookname.id and contactaddressbookmap.contactId = contacts.id and entryDate>='2019-02-10'and entryDate<='2020-07-01'";
+		case "state":
+			if (contactDataStatement == null) {
+				this.preparedStatementForContactData("state", "state");
+			}
+
+			System.out.println(contactDataStatement.toString().split(":")[1]);
+			return contactDataStatement.toString().split(":")[1];
+
+		case "city":
+			if (contactDataStatement == null) {
+				this.preparedStatementForContactData("city", "city");
+			}
+
+			System.out.println(contactDataStatement.toString().split(":")[1]);
+			return contactDataStatement.toString().split(":")[1];
+
+		default:
+			break;
+		}
+		return null;
+
+	}
+
+	public List<Contacts> retrieveData(String type) {
+		String sql = getStatement(type);
 		List<Contacts> contactList = new ArrayList<>();
 		ResultSet resultSet = null;
 		try (Connection connection = this.getConnection()) {
 
 			Statement statement = connection.createStatement();
 			resultSet = statement.executeQuery(sql);
-			contactList = this.getContactData(resultSet);
+			if (type.equals("state") || type.equals("city")) {
+				switch (type) {
+				case "state":
+					this.prepareMap(resultSet, "state");
+					break;
+
+				case "city":
+					this.prepareMap(resultSet, "city");
+					break;
+
+				default:
+					break;
+				}
+
+			} else {
+				contactList = this.getContactData(resultSet);
+			}
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return contactList;
 	}
-	
+
 	public int updateData(String fname, String phoneNumber) {
 		String sql = String.format("update contacts set phoneNumber = '%s' where firstName = '%s'", phoneNumber, fname);
 		try (Connection connection = this.getConnection()) {
@@ -73,8 +159,11 @@ public class AddressBookDBIOService {
 
 	public static void main(String[] args) throws SQLException {
 		System.out.println(new AddressBookDBIOService().getConnection());
-		List<Contacts> k = new AddressBookDBIOService().retrieveData();
-		System.out.println(new AddressBookDBIOService().updateData("Preetam", "654321"));
+		List<Contacts> k = new AddressBookDBIOService().retrieveData("state");
+		AddressBookDBIOService add = new AddressBookDBIOService();
+		add.retrieveData("state");
+		System.out.println(add.CountMap.get("Bihar"));
+
 	}
 
 }
