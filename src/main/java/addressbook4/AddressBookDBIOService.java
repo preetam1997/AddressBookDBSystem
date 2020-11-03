@@ -1,6 +1,7 @@
 package addressbook4;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.collections.map.HashedMap;
 
@@ -157,13 +159,91 @@ public class AddressBookDBIOService {
 
 	}
 
-	public static void main(String[] args) throws SQLException {
-		System.out.println(new AddressBookDBIOService().getConnection());
-		List<Contacts> k = new AddressBookDBIOService().retrieveData("state");
-		AddressBookDBIOService add = new AddressBookDBIOService();
-		add.retrieveData("state");
-		System.out.println(add.CountMap.get("Bihar"));
+	public int insertData(Entry<AddressBook, Contacts> entry) throws SQLException {
 
+		AddressBookDBIOService addressBookDBIOService = new AddressBookDBIOService();
+		Contacts contact = entry.getValue();
+		AddressBook addressBook = entry.getKey();
+		int rowAffected = 0;
+		Connection connection = null;
+		try {
+
+			connection = this.getConnection();
+			connection.setAutoCommit(false);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		try (Statement statement = connection.createStatement()) {
+			String sql = String.format("insert into contacts values('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')",
+					contact.id, contact.firstName, contact.lastName, contact.Address, contact.City, contact.State,
+					contact.zip, contact.phoneNumber, contact.email, Date.valueOf(contact.date));
+			rowAffected = statement.executeUpdate(sql);
+			System.out.println(rowAffected);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			connection.rollback();
+			
+		}
+		if (!addressBookIsPresent(addressBook.id)) {
+
+			try (Statement statement = connection.createStatement()) {
+				String addressBookNameSql = String.format("insert into addressbookname values('%s','%s')",
+						addressBook.id, addressBook.name);
+				rowAffected = statement.executeUpdate(addressBookNameSql);
+				System.out.println(rowAffected);
+			} catch (SQLException e) {
+				connection.rollback();
+			}
+
+			try (Statement statement = connection.createStatement()) {
+				String addressBookTypeSql = String.format("insert into addressbookname values('%s','%s')",
+						addressBook.id, addressBook.type);
+				rowAffected = statement.executeUpdate(addressBookTypeSql);
+				System.out.println(rowAffected);
+			} catch (SQLException e) {
+				connection.rollback();
+			}
+		}
+
+		try (Statement statement = connection.createStatement()) {
+			String contactaddressbookmapSql = String.format("insert into contactaddressbookmap values('%s','%s')",
+					contact.id, addressBook.id);
+			rowAffected = statement.executeUpdate(contactaddressbookmapSql);
+			System.out.println(rowAffected);
+		} catch (SQLException e) {
+			connection.rollback();
+		}
+//		try {
+//			try {
+//				connection.commit();
+//			} catch (SQLException e) {
+//				e.printStackTrace();
+//			}
+//		} 
+		finally {
+			if (connection != null) {
+				connection.close();
+			}
+		}
+		return rowAffected;
 	}
 
+	private boolean addressBookIsPresent(String id) {
+		String sql = "select id from addressbookname";
+		ResultSet resultSet = null;
+		try (Connection connection = this.getConnection()) {
+			Statement statement = connection.createStatement();
+			resultSet = statement.executeQuery(sql);
+			while (resultSet.next()) {
+				if (id.equals(resultSet.getString("id"))) {
+					return true;
+				}
+			}
+		} catch (SQLException e) {
+		}
+		return false;
+	}
+
+	
 }
