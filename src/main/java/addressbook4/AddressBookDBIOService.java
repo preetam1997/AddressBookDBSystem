@@ -179,28 +179,29 @@ public class AddressBookDBIOService {
 					contact.id, contact.firstName, contact.lastName, contact.Address, contact.City, contact.State,
 					contact.zip, contact.phoneNumber, contact.email, Date.valueOf(contact.date));
 			rowAffected = statement.executeUpdate(sql);
-			System.out.println(rowAffected);
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 			connection.rollback();
-			
+
 		}
+
 		if (!addressBookIsPresent(addressBook.id)) {
 
 			try (Statement statement = connection.createStatement()) {
 				String addressBookNameSql = String.format("insert into addressbookname values('%s','%s')",
 						addressBook.id, addressBook.name);
 				rowAffected = statement.executeUpdate(addressBookNameSql);
-				System.out.println(rowAffected);
+
 			} catch (SQLException e) {
 				connection.rollback();
 			}
 
 			try (Statement statement = connection.createStatement()) {
-				String addressBookTypeSql = String.format("insert into addressbookname values('%s','%s')",
+				String addressBookTypeSql = String.format("insert into addressbooktype values('%s','%s')",
 						addressBook.id, addressBook.type);
 				rowAffected = statement.executeUpdate(addressBookTypeSql);
-				System.out.println(rowAffected);
+
 			} catch (SQLException e) {
 				connection.rollback();
 			}
@@ -210,17 +211,17 @@ public class AddressBookDBIOService {
 			String contactaddressbookmapSql = String.format("insert into contactaddressbookmap values('%s','%s')",
 					contact.id, addressBook.id);
 			rowAffected = statement.executeUpdate(contactaddressbookmapSql);
-			System.out.println(rowAffected);
+
 		} catch (SQLException e) {
 			connection.rollback();
 		}
-//		try {
-//			try {
-//				connection.commit();
-//			} catch (SQLException e) {
-//				e.printStackTrace();
-//			}
-//		} 
+		try {
+			try {
+				connection.commit();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} 
 		finally {
 			if (connection != null) {
 				connection.close();
@@ -245,5 +246,4 @@ public class AddressBookDBIOService {
 		return false;
 	}
 
-	
 }
