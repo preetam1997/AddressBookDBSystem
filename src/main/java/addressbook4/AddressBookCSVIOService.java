@@ -12,9 +12,11 @@ import com.opencsv.CSVWriter;
 
 public class AddressBookCSVIOService {
 
+	// fields
 	public static String OUTPUT_FILE_NAME = "C:\\Users\\Preetam\\eclipse-workspace\\addressbook3\\resource\\output_to.csv";
 	public static String INPUT_FILE_NAME = "C:\\Users\\Preetam\\eclipse-workspace\\addressbook3\\resource\\input_from.csv";
 
+	// method to write to csv file
 	public void writeContactData(Map<String, AddressBook> AddressBookMap) throws IOException {
 		FileWriter fileWriter = new FileWriter(OUTPUT_FILE_NAME);
 		CSVWriter writer = new CSVWriter(fileWriter);
@@ -29,11 +31,11 @@ public class AddressBookCSVIOService {
 				contacts.add(contact_);
 			});
 		});
-
 		writer.writeAll(contacts);
 		writer.close();
 	}
 
+	// method to read to csv file
 	public void readContactData(Map<String, AddressBook> AddressBookMap) throws IOException {
 		FileReader fileReader = new FileReader(INPUT_FILE_NAME);
 		CSVReader csvReader = new CSVReaderBuilder(fileReader).withSkipLines(1).build();
@@ -44,14 +46,10 @@ public class AddressBookCSVIOService {
 				AddressBookMap.put(nextRecord[0], new AddressBook());
 				AddressBookMap.get(nextRecord[0]).contactList.add(new Contacts(nextRecord[1], nextRecord[2],
 						nextRecord[3], nextRecord[4], nextRecord[5], nextRecord[6], nextRecord[7], nextRecord[8]));
-
-			}
-
-			else {
+			} else {
 				AddressBookMap.get(nextRecord[0]).contactList.add(new Contacts(nextRecord[1], nextRecord[2],
 						nextRecord[3], nextRecord[4], nextRecord[5], nextRecord[6], nextRecord[7], nextRecord[8]));
 			}
 		}
 	}
-
 }

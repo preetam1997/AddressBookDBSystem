@@ -58,6 +58,7 @@ public class AddressBookTest {
 		});
 	}
 	
+	@Test
 	public void givenDatabase_WhenInsertedDataUsingThreads_ShouldPassTest() {
 		Map<AddressBook, Contacts> map = new HashedMap();
 		

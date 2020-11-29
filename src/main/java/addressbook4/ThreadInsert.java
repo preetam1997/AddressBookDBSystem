@@ -12,10 +12,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class ThreadInsert {
-
+	
+	// DBMS Insert Using Threads
 	public void InsertUsingThread(Set<Entry<AddressBook, Contacts>> entrySet) {
 		Map<Integer, Boolean> contactAdditionStatus = new HashedMap();
-		ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
+		//ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
 		entrySet.forEach(entry -> {
 			Runnable task = () -> {
 				try {
@@ -29,7 +30,7 @@ public class ThreadInsert {
 			Thread thread = new Thread(task);
 			thread.start();
 		});
-		System.out.println("from func" + " " + result);
+		//System.out.println("from func" + " " + result);
 		while (contactAdditionStatus.containsValue(false)) {
 			try {
 				Thread.sleep(600);
@@ -39,10 +40,6 @@ public class ThreadInsert {
 
 		}
 
-		
 	}
 
-	public static void main(String[] args) {
-		
-	}
 }

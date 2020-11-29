@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 public class Contacts {
+	//parameters
 	public String id;
 	public String firstName;
 	public String lastName;
@@ -14,7 +15,8 @@ public class Contacts {
 	public String phoneNumber;
 	public String email;
 	public LocalDate date;
-
+	
+	//constructor1
 	public Contacts(String firstName, String lastName, String Address, String City, String State, String zip,
 			String phoneNumber, String email) {
 
@@ -28,7 +30,8 @@ public class Contacts {
 		this.email = email;
 
 	}
-
+	
+	//constructor2
 	public Contacts(String id, String firstName, String lastName, String Address, String City, String State, String zip,
 			String phoneNumber, String email, LocalDate date) {
 		this.id = id;
@@ -61,6 +64,7 @@ public class Contacts {
 		return firstName.equals(c.firstName) && lastName.equals(c.lastName);
 	}
 
+	//getters
 	public String get_firstName() {
 
 		return firstName;
@@ -80,7 +84,8 @@ public class Contacts {
 
 		return zip;
 	}
-
+	
+	//toString() method
 	public String toString() {
 		return firstName + " " + lastName + " " + Address + " " + City + " " + State + " " + zip + " " + phoneNumber
 				+ " " + email;

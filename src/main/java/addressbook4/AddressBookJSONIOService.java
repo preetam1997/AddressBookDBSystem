@@ -13,6 +13,7 @@ public class AddressBookJSONIOService {
 	public static String OUTPUT_FILE_NAME = "C:\\Users\\Preetam\\eclipse-workspace\\addressbook3\\resource\\output_to.json";
 	public static String INPUT_FILE_NAME = "C:\\Users\\Preetam\\eclipse-workspace\\addressbook3\\resource\\input_from.json";
 
+	
 	@SuppressWarnings({ "unchecked", "resource" })
 	public void writeData(Map<String, AddressBook> AddressBookMap) throws IOException {
 		FileWriter fileWriter = new FileWriter(OUTPUT_FILE_NAME);
@@ -69,7 +70,6 @@ public class AddressBookJSONIOService {
 			AddressBookMap.put(addressBookName, new AddressBook());
 			AddressBookMap.get(addressBookName).contactList
 					.add(new Contacts(firstName, lastName, address, city, state, zip, phoneNumber, email));
-
 		}
 
 		else {

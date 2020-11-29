@@ -17,16 +17,17 @@ import org.apache.commons.collections.map.HashedMap;
 
 public class AddressBookDBIOService {
 
+	// fields
 	private PreparedStatement contactDataStatement;
 	public Map<String, Integer> CountMap = new HashedMap();
 
+	// Function to get contact
 	private List<Contacts> getContactData(ResultSet resultSet) {
 		List<Contacts> contactList = new ArrayList<>();
 		try {
 			while (resultSet.next()) {
 				String addressBookType = resultSet.getString("addressBookType");
 				String addressBookName = resultSet.getString("addressBookName");
-
 				String fName = resultSet.getString("firstName");
 				String lName = resultSet.getString("lastName");
 				String address = resultSet.getString("address");
@@ -35,18 +36,16 @@ public class AddressBookDBIOService {
 				String zip = resultSet.getString("zip");
 				String phoneNumber = resultSet.getString("phoneNumber");
 				String email = resultSet.getString("email");
-
 				contactList.add(new Contacts(fName, lName, address, city, state, zip, phoneNumber, email));
 
 			}
 		} catch (SQLException e) {
-
 			e.printStackTrace();
 		}
 		return contactList;
+		}
 
-	}
-
+	// Preparing CountMap
 	private void prepareMap(ResultSet resultSet, String type) {
 		try {
 			CountMap.clear();
@@ -60,15 +59,14 @@ public class AddressBookDBIOService {
 					int count = resultSet.getInt("count(*)");
 					CountMap.put(state, count);
 				}
-
 			}
 		} catch (SQLException e) {
 
 			e.printStackTrace();
 		}
-
 	}
 
+	// prepared statement
 	private void preparedStatementForContactData(String arg1, String arg2) {
 		try {
 			Connection connection = this.getConnection();
@@ -77,14 +75,32 @@ public class AddressBookDBIOService {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
+	}
+	
+	// function That returns true if addressBook is present in the database
+	private boolean addressBookIsPresent(String id) {
+		String sql = "select id from addressbookname";
+		ResultSet resultSet = null;
+		try (Connection connection = this.getConnection()) {
+			Statement statement = connection.createStatement();
+			resultSet = statement.executeQuery(sql);
+			while (resultSet.next()) {
+				if (id.equals(resultSet.getString("id"))) {
+					return true;
+				}
+			}
+		} catch (SQLException e) {
+		}
+		return false;
 	}
 
+	// function to get the connection object
 	public Connection getConnection() throws SQLException {
 		Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/AddressBook", "root", "Preetam@1997");
 		return con;
 	}
 
+	// function to get sql string as and when required
 	public String getStatement(String type) {
 		switch (type) {
 		case "normal":
@@ -95,7 +111,6 @@ public class AddressBookDBIOService {
 			if (contactDataStatement == null) {
 				this.preparedStatementForContactData("state", "state");
 			}
-
 			System.out.println(contactDataStatement.toString().split(":")[1]);
 			return contactDataStatement.toString().split(":")[1];
 
@@ -103,7 +118,6 @@ public class AddressBookDBIOService {
 			if (contactDataStatement == null) {
 				this.preparedStatementForContactData("city", "city");
 			}
-
 			System.out.println(contactDataStatement.toString().split(":")[1]);
 			return contactDataStatement.toString().split(":")[1];
 
@@ -113,13 +127,13 @@ public class AddressBookDBIOService {
 		return null;
 
 	}
-
+	
+	// function to retrieve data from sql
 	public List<Contacts> retrieveData(String type) {
 		String sql = getStatement(type);
 		List<Contacts> contactList = new ArrayList<>();
 		ResultSet resultSet = null;
 		try (Connection connection = this.getConnection()) {
-
 			Statement statement = connection.createStatement();
 			resultSet = statement.executeQuery(sql);
 			if (type.equals("state") || type.equals("city")) {
@@ -145,7 +159,8 @@ public class AddressBookDBIOService {
 		}
 		return contactList;
 	}
-
+	
+	// function to update data in the sql table
 	public int updateData(String fname, String phoneNumber) {
 		String sql = String.format("update contacts set phoneNumber = '%s' where firstName = '%s'", phoneNumber, fname);
 		try (Connection connection = this.getConnection()) {
@@ -159,6 +174,7 @@ public class AddressBookDBIOService {
 
 	}
 
+	// insert function
 	public int insertData(Entry<AddressBook, Contacts> entry) throws SQLException {
 
 		AddressBookDBIOService addressBookDBIOService = new AddressBookDBIOService();
@@ -221,29 +237,12 @@ public class AddressBookDBIOService {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-		} 
-		finally {
+		} finally {
 			if (connection != null) {
 				connection.close();
 			}
 		}
 		return rowAffected;
-	}
-
-	private boolean addressBookIsPresent(String id) {
-		String sql = "select id from addressbookname";
-		ResultSet resultSet = null;
-		try (Connection connection = this.getConnection()) {
-			Statement statement = connection.createStatement();
-			resultSet = statement.executeQuery(sql);
-			while (resultSet.next()) {
-				if (id.equals(resultSet.getString("id"))) {
-					return true;
-				}
-			}
-		} catch (SQLException e) {
-		}
-		return false;
 	}
 
 }
